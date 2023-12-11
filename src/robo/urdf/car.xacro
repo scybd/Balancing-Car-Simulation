@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+
+<robot name="balancing_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:property name="base_link_length" value="0.4"/>
+    <xacro:property name="base_link_radius" value="0.01"/>
+    <xacro:property name="wheel_radius" value="0.1"/>
+    <xacro:property name="wheel_width" value="0.02"/>
+    <xacro:property name="support_x" value="0.01"/>
+    <xacro:property name="support_y" value="0.1"/>
+    <xacro:property name="support_z" value="0.13"/>
+    <xacro:property name="UAV_x" value="0.4"/>
+    <xacro:property name="UAV_y" value="0.4"/>
+    <xacro:property name="UAV_z" value="0.05"/>
+
+    <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+    </material>
+    <material name="blue">
+        <color rgba="0.0 0.0 0.8 1.0"/>
+    </material>
+
+
+    <!-- Virtual linkage, as specifying inertia on the base_link is not supported -->
+    <link name="dummy_link"/>
+
+
+    <link name="base_link">
+        <visual>
+            <origin rpy="1.5707 0 0"/>
+            <geometry>
+                <cylinder radius="${base_link_radius}" length="${base_link_length}"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <origin rpy="1.5707 0 0"/>
+            <geometry>
+                <cylinder radius="${base_link_radius}" length="${base_link_length}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.1"/>
+            <inertia ixx="0.001336" ixy="0.0" ixz="0.0" iyy="0.001336" iyz="0.0" izz="0.000005"/>
+        </inertial>
+    </link>
+
+    <joint name="dummy_to_base" type="fixed">
+        <parent link="dummy_link"/>
+        <child link="base_link"/>
+    </joint>
+
+    <xacro:macro name="wheel" params="param pos">
+        <link name="${pos}_wheel">
+            <visual>
+                <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+                </geometry>
+                <material name="blue"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="0.5"/>
+                <inertia ixx="0.00127" ixy="0.0" ixz="0.0" iyy="0.00127" iyz="0.0" izz="0.0025"/>
+            </inertial>
+        </link>
+
+        <joint name="base_to_${pos}_wheel" type="continuous">
+            <parent link="base_link"/>
+            <child link="${pos}_wheel"/>
+            <origin xyz="0 ${param * base_link_length/2} 0"/>
+            <axis xyz="0 1 0"/>
+        </joint>
+
+        <gazebo reference="${pos}_wheel">
+            <mu1 value="200"/>
+            <mu2 value="100"/>
+            <material>Gazebo/Grey</material>
+        </gazebo>
+
+        <transmission name="${pos}_wheel_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="base_to_${pos}_wheel">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${pos}_wheel_motor">
+                <mechanicalReduction>1.0</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <xacro:wheel param="1" pos="left"/>
+    <xacro:wheel param="-1" pos="right"/>
+
+
+    <link name="support">
+        <visual>
+            <origin xyz="0.0 0.0 0"/>
+            <geometry>
+                <box size="${support_x} ${support_y} ${support_z}"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 ${support_z/2}"/>
+            <geometry>
+                <box size="${support_x} ${support_y} ${support_z}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.1"/>
+            <inertia ixx="0.00083" ixy="0.0" ixz="0.0" iyy="0.00075" iyz="0.0" izz="0.00008"/>
+        </inertial>
+    </link>
+
+    <joint name="base_to_support" type="fixed">
+        <parent link="base_link"/>
+        <child link="support"/>
+        <origin xyz="0.0 0.0 ${support_z/2}"/>
+    </joint>
+
+
+    <link name="UAV">
+        <visual name="">
+            <origin xyz="0.0 0.0 0"/>
+            <geometry>
+                <box size="${UAV_x} ${UAV_y} ${UAV_z}"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 ${support_z}"/>
+            <geometry>
+                <box size="${UAV_x} ${UAV_y} ${UAV_z}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="4"/>
+            <inertia ixx="0.05417" ixy="0.0" ixz="0.0" iyy="0.05417" iyz="0.0" izz="0.10667"/>
+        </inertial>
+    </link>
+
+    <joint name="UAV_to_support" type="fixed">
+        <parent link="support"/>
+        <child link="UAV"/>      
+        <origin xyz="0.0 0.0 ${support_z/2}"/>
+    </joint>
+
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+
+    
+    <gazebo reference="support">
+        <gravity>true</gravity>
+        <sensor name="imu_sensor" type="imu">
+            <always_on>true</always_on>
+            <update_rate>50</update_rate>
+            <visualize>true</visualize>
+            <topic>__default_topic__</topic>
+            <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                <topicName>imu/data</topicName>
+                <bodyName>body_link</bodyName>
+                <updateRateHZ>50.0</updateRateHZ>
+                <gaussianNoise>0.0</gaussianNoise>
+                <xyzOffset>0 0 0</xyzOffset>
+                <rpyOffset>0 0 0</rpyOffset>
+                <frameName>imu_link</frameName>
+            </plugin>
+            <pose>0 0 0 0 0 0</pose>
+        </sensor>
+    </gazebo>
+
+</robot>
+

@@ -1,0 +1,21 @@
+<launch>
+    <!-- Gazebo configuration file -->
+    <include file="$(find robo)/launch/gazebo.launch">
+        <arg name="model" value="$(find robo)/urdf/car.xacro" />
+    </include>
+
+    <!-- Load parameters into the specified namespace -->
+    <rosparam command="load" file="$(find robo)/config/joints.yaml" ns="joint_state_controller" />
+    <rosparam command="load" file="$(find robo)/config/wheels.yaml" ns="wheels_controller" />
+
+    <!-- The controller is responsible for managing the joint status of the robot -->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" 
+        args="joint_state_controller
+                wheels_controller"/>
+
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen" />
+
+    <node pkg="balancing_car_control" type="sensor" name="sensor" output="screen" />
+    <node pkg="balancing_car_control" type="controller" name="controller" output="screen" />
+
+</launch>
