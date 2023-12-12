@@ -1,14 +1,14 @@
-# 传感器感知到的数据
-float64 leftWheelVelocity        # 左轮速度
-float64 rightWheelVelocity       # 右轮速度
-float64 pitch                    # 平衡车俯仰角
-float64 yaw                      # 平衡车偏航角
-float64 pitchAngVelocity         # 平衡车俯仰角角速度
-float64 yawAngVelocity           # 平衡车偏航角角速度
-# 键盘控制节点收到的控制消息
-float64 dst_vel                  # 期望速度
-float64 dst_yaw                  # 期望偏航角
+# Data sensed by sensors
+float64 leftWheelVelocity        
+float64 rightWheelVelocity       
+float64 pitch                    
+float64 yaw                     
+float64 pitchAngVelocity         
+float64 yawAngVelocity           
+# Control messages received by the keyboard control node
+float64 dst_vel                  
+float64 dst_yaw                  
 ---
-# 平衡车两轮的控制力矩
+# Control torque of two wheels of balancing car
 float64 leftTorque
 float64 rightTorque

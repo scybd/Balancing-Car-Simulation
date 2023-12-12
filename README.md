@@ -11,12 +11,12 @@
 ### Package Descriptions
 - **robo** includes the balance car model, controller configuration files, and launch files.
 - **balancing_car_control**
-  - *controller.cpp* - Contains the control algorithm.
-  - *sensor.cpp* - Manages sensor perception.
-  - *keyboard_cmd.cpp* - Handles keyboard motion control.
+  - *controller.cpp* Contains the control algorithm.
+  - *sensor.cpp* Manages sensor perception.
+  - *keyboard_cmd.cpp* Handles keyboard motion control.
 
 ### Usage Instructions
-1. Compile the project: **catkin_make**
+1. Compile the project in the root directory of the project: **catkin_make**
 2. Refresh the environment variables: **source devel/setup.bash**
 3. Launch the main system: **roslaunch robo car.launch**
 4. Run the keyboard control node: **rosrun balancing_car_control keyboard_cmd**
@@ -45,7 +45,7 @@
   - *keyboard_cmd.cpp* 键盘运动控制部分
 
 ### 使用说明
-1. 编译项目： **catkin_make**
+1. 在该工程的根目录编译项目： **catkin_make**
 2. 刷新环境变量： **source devel/setup.bash**
 3. 运行主体： **roslaunch robo car.launch**
 4. 运行键盘控制节点： **rosrun balancing_car_control keyboard_cmd**
