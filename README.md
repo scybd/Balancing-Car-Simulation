@@ -1,5 +1,6 @@
 # Balancing Car Simulation in Gazebo and Ros(Noetic)
-![cover](img/cover.png)
+- ![cover](img/cover.png)
+- [demo video](https://www.bilibili.com/video/BV1Rg4y1y7eg/?share_source=copy_web&vd_source=e67cc43f2e8443b722a5f50ef79db03e)
 
 ## English
 ### Control Principles
